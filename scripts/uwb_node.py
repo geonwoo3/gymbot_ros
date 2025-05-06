@@ -1,9 +1,10 @@
+#!/usr/bin/env python3
+
 import rospy
 import serial
 import numpy as np
 from std_msgs.msg import String
 from scipy.optimize import minimize, NonlinearConstraint
-from sensor_msgs.msg import LaserScan
 
 anchor_port = {}
 pub = None
@@ -23,7 +24,6 @@ def read_from_anchor(event):
 def uwb_publisher():
     global anchor_port, pub
 
-    rospy.init_node('uwb_node', anonymous = True)
     # Publisher for UWB
     pub = rospy.Publisher('/uwb_distance', String, queue_size=10)
 
@@ -38,13 +38,10 @@ def uwb_publisher():
         return
 
     # Set up a timer to read from UWB anchor every 0.33 seconds (~3Hz)
-    rospy.Timer(rospy.Duration(1.0 / 3), read_from_anchor)
-
+    rospy.Timer(rospy.Duration(1.0 / 4), read_from_anchor)
     rospy.spin()
 
 
-def uwb_listener():
-    rospy.Subscriber('/uwb_distance', String, callback)
 
 
 def estimate_target(anchors, anchor_centers):
@@ -79,27 +76,25 @@ def estimate_target(anchors, anchor_centers):
 
     result = minimize(objective, x0, constraints = constraints, method="SLSQP")
 
-    x = result.x[0:3]
+    target = result.x[0:3]
 
-    return x
+    return target
 
 class UWB:
 
     def __init__(self,
-                subscriber,
-                rate
+                rate=4
                 ):
-        self.subscriber = subscriber
         self.anchors = {}
         self.target_coordinate = None
         self.traj = []
         self.rate = rospy.Rate(rate)
-        subscriber(self.uwb_callback)
+        rospy.Subscriber('/uwb_distance', String, self.uwb_callback)
         # Anchor positions
         self.anchor_centers = [
             np.array([0,  np.sqrt(3)/2, 0]),
             np.array([-1, -np.sqrt(3)/2, 0]),
-            np.array([1,  -np.sqrt(3)/2, 0]),     
+            np.array([1,  -np.sqrt(3)/2, 0])   
         ]
 
 

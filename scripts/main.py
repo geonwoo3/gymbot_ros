@@ -6,19 +6,21 @@ import serial
 from std_msgs.msg import String
 from sensor_msgs.msg import LaserScan
 from uwb_node import uwb_publisher, UWB, uwb_listener
+from lidar_node import Lidar
 import threading
 
 
 
-
 def main():
-    pub_uwb_thread = threading.Thread(target = uwb_publisher)
-    pub_uwb_thread.start()
+    rospy.init_node('main_controller', anonymous=True)
 
     rospy.sleep(1)
 
 
-    uwb = UWB(subscriber=uwb_listener)
+    uwb = UWB(rate = 4)
+    lidar = Lidar(delta_thresh = 0.2)
+
+    rospy.spin()
 
 
 if __name__ == '__main__':
