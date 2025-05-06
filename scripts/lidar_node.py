@@ -43,3 +43,4 @@ class Lidar():
                                                     data.range_min,
                                                     data.range_max,
                                                     self.delta_thresh)
+        rospy.loginfo(self.obstacle_coordinates)

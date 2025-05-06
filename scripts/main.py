@@ -5,7 +5,7 @@ import rospy
 import serial
 from std_msgs.msg import String
 from sensor_msgs.msg import LaserScan
-from uwb_node import uwb_publisher, UWB, uwb_listener
+from uwb_node import uwb_publisher, UWB
 from lidar_node import Lidar
 import threading
 

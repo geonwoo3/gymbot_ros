@@ -104,6 +104,7 @@ class UWB:
             self.anchors[anchor_id] = float(distance)
 
             self.target_coordinate = estimate_target(self.anchors, self.anchor_centers)
+            rospy.loginfo(self.target_coordinate)
         except Exception as e:
             rospy.logwarn(f"[UWB Class] Failed to parse msg: {msg.data}, error: {e}")
 
