@@ -100,11 +100,15 @@ class UWB:
 
     def uwb_callback(self, msg):
         try:
-            anchor_id, distance = msg.data.split()
-            self.anchors[anchor_id] = float(distance)
+            parts = msg.data.split()
+            if len(parts) >= 2:
 
-            self.target_coordinate = estimate_target(self.anchors, self.anchor_centers)
-            rospy.loginfo(self.target_coordinate)
+                anchor_id, distance = parts[0], parts[1]
+                rospy.loginfo(anchor_id, distance)
+                self.anchors[anchor_id] = float(distance)
+
+                self.target_coordinate = estimate_target(self.anchors, self.anchor_centers)
+                rospy.loginfo(f"Target: ", {self.target_coordinate})
         except Exception as e:
             rospy.logwarn(f"[UWB Class] Failed to parse msg: {msg.data}, error: {e}")
 

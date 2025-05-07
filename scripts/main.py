@@ -17,6 +17,10 @@ def main():
 
     rospy.sleep(1)
 
+    uwb_thread = threading.Thread(target=uwb_publisher)
+    uwb_thread.daemon = True
+    uwb_thread.start()
+
 
     uwb = UWB(rate = 4)
     lidar = Lidar(delta_thresh = 0.2)
