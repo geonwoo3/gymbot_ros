@@ -24,9 +24,15 @@ def main():
 
     uwb = UWB(rate = 4)
     lidar = Lidar(delta_thresh = 0.2)
-    rospy.spin()
+    visualizer = Visualizer(uwb, lidar)
 
-    # Visualizer(uwb, lidar)
+    # Use rospy.Rate to manage loop frequency
+    rate = rospy.Rate(10)  # 10 Hz
+    while not rospy.is_shutdown():
+        visualizer.update_plot()
+        rate.sleep()
+
+    
 
 
 if __name__ == '__main__':

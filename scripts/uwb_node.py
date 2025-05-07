@@ -16,7 +16,7 @@ def read_from_anchor(event):
             if line:
                 msg = f"{anchor_name} {line}"
 
-                rospy.loginfo(msg)
+                # rospy.loginfo(msg)
                 pub.publish(msg)
         except Exception as e:
             rospy.logerr(f"Error reading from {anchor_name}: {e}")
@@ -44,7 +44,7 @@ def uwb_publisher():
 
 
 
-def estimate_target(anchors, anchor_centers):
+def estimate_target(anchors, anchor_centers, prev):
     try:
         distances = [anchors["A1"], anchors["A2"], anchors["A3"]]
         c1 = anchor_centers[0]
@@ -79,13 +79,13 @@ def estimate_target(anchors, anchor_centers):
 
         if not result.success:
             rospy.loginfo("Optimization failed")
-            return Non
+            return prev
         target = result.x[0:3]
 
         return target
     except Exception as e:
-        rospy.logerr(f"error was : {e}")
-        return None
+        rospy.logerr(f"optimization error was : {e}")
+        return prev
 
 class UWB:
 
@@ -93,7 +93,7 @@ class UWB:
                 rate=4
                 ):
         self.anchors = {}
-        self.target_coordinate = None
+        self.target_coordinate = [0, 0, 0]
         self.traj = []
         self.rate = rospy.Rate(rate)
         rospy.Subscriber('/uwb_distance', String, self.uwb_callback)
@@ -108,16 +108,18 @@ class UWB:
     def uwb_callback(self, msg):
         try:
             parts = msg.data.split()
-            rospy.loginfo(f"Message parts: {parts}")
+            # rospy.loginfo(f"Message parts: {parts}")
             if len(parts) >= 2:
 
                 anchor_id, distance = parts[0], parts[1]
-                rospy.loginfo(anchor_id, distance)
+            
                 self.anchors[anchor_id] = float(distance)
-                rospy.loginfo(f"Full dict: {self.anchors}")
+                # rospy.loginfo(f"Full dict: {self.anchors}")
+                required_anchors = ["A1", "A2", "A3"]
+                if all(anchor in self.anchors for anchor in required_anchors):
 
-                self.target_coordinate = estimate_target(self.anchors, self.anchor_centers)
-                rospy.loginfo(f"Target: ", {self.target_coordinate})
+                    self.target_coordinate = estimate_target(self.anchors, self.anchor_centers, self.target_coordinate)
+                    rospy.loginfo(f"Target:  {self.target_coordinate}")
         except Exception as e:
             rospy.logwarn(f"[UWB Class] Failed to parse msg: {msg.data}, error: {e}")
 
