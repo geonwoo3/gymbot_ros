@@ -35,7 +35,7 @@ class Lidar():
         self.delta_thresh = delta_thresh
         self.obstacle_coordinates = []
         rospy.Subscriber('/scan', LaserScan, self.callback)
-        
+
     def callback(self, data):
         self.obstacle_coordinates = adaptive_sample(data.ranges,
                                                     data.angle_min,
@@ -44,3 +44,6 @@ class Lidar():
                                                     data.range_max,
                                                     self.delta_thresh)
         rospy.loginfo(self.obstacle_coordinates)
+
+    def get_obstacle_coordinates(self):
+        return self.obstacle_coordinates

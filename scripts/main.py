@@ -7,6 +7,7 @@ from std_msgs.msg import String
 from sensor_msgs.msg import LaserScan
 from uwb_node import uwb_publisher, UWB
 from lidar_node import Lidar
+from visualizer import Visualizer
 import threading
 
 
@@ -19,8 +20,9 @@ def main():
 
     uwb = UWB(rate = 4)
     lidar = Lidar(delta_thresh = 0.2)
-
     rospy.spin()
+
+    # Visualizer(uwb, lidar)
 
 
 if __name__ == '__main__':
