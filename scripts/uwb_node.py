@@ -45,40 +45,47 @@ def uwb_publisher():
 
 
 def estimate_target(anchors, anchor_centers):
-    distances = [anchors["A1"], anchors["A2"], anchors["A3"]]
-    c1 = anchor_centers[0]
-    c2 = anchor_centers[1] 
-    c3 = anchor_centers[2]
+    try:
+        distances = [anchors["A1"], anchors["A2"], anchors["A3"]]
+        c1 = anchor_centers[0]
+        c2 = anchor_centers[1] 
+        c3 = anchor_centers[2]
 
-    def objective(vars):
-        x = vars[0:3]
-        s1 = vars[3:6]
-        s2 = vars[6:9]
-        s3 = vars[9:12]
-        return np.linalg.norm(x - s1) + np.linalg.norm(x - s2) + np.linalg.norm(x - s3)
-    
-    def constraint_sphere1(vars): return np.linalg.norm(vars[3:6] - c1) - distances[0]
-    def constraint_sphere2(vars): return np.linalg.norm(vars[6:9] - c2) - distances[1]
-    def constraint_sphere3(vars): return np.linalg.norm(vars[9:12] - c3) - distances[2]
+        def objective(vars):
+            x = vars[0:3]
+            s1 = vars[3:6]
+            s2 = vars[6:9]
+            s3 = vars[9:12]
+            return np.linalg.norm(x - s1) + np.linalg.norm(x - s2) + np.linalg.norm(x - s3)
+        
+        def constraint_sphere1(vars): return np.linalg.norm(vars[3:6] - c1) - distances[0]
+        def constraint_sphere2(vars): return np.linalg.norm(vars[6:9] - c2) - distances[1]
+        def constraint_sphere3(vars): return np.linalg.norm(vars[9:12] - c3) - distances[2]
 
-    constraints = [
-        NonlinearConstraint(constraint_sphere1, 0, 0),
-        NonlinearConstraint(constraint_sphere2, 0, 0),
-        NonlinearConstraint(constraint_sphere3, 0, 0)
-    ]
+        constraints = [
+            NonlinearConstraint(constraint_sphere1, 0, 0),
+            NonlinearConstraint(constraint_sphere2, 0, 0),
+            NonlinearConstraint(constraint_sphere3, 0, 0)
+        ]
 
-    x0 = np.concatenate([
-        np.mean(anchor_centers, axis = 0),
-        c1 + np.array([distances[0], 0, 0]),
-        c2 + np.array([distances[1], 0, 0]),
-        c3 + np.array([distances[2], 0, 0]),
-    ])
+        x0 = np.concatenate([
+            np.mean(anchor_centers, axis = 0),
+            c1 + np.array([distances[0], 0, 0]),
+            c2 + np.array([distances[1], 0, 0]),
+            c3 + np.array([distances[2], 0, 0]),
+        ])
 
-    result = minimize(objective, x0, constraints = constraints, method="SLSQP")
+        result = minimize(objective, x0, constraints = constraints, method="SLSQP")
 
-    target = result.x[0:3]
+        if not result.success:
+            rospy.loginfo("Optimization failed")
+            return Non
+        target = result.x[0:3]
 
-    return target
+        return target
+    except Exception as e:
+        rospy.logerr(f"error was : {e}")
+        return None
 
 class UWB:
 
@@ -101,11 +108,13 @@ class UWB:
     def uwb_callback(self, msg):
         try:
             parts = msg.data.split()
+            rospy.loginfo(f"Message parts: {parts}")
             if len(parts) >= 2:
 
                 anchor_id, distance = parts[0], parts[1]
                 rospy.loginfo(anchor_id, distance)
                 self.anchors[anchor_id] = float(distance)
+                rospy.loginfo(f"Full dict: {self.anchors}")
 
                 self.target_coordinate = estimate_target(self.anchors, self.anchor_centers)
                 rospy.loginfo(f"Target: ", {self.target_coordinate})
