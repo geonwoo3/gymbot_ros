@@ -1,174 +1,97 @@
-# RPLIDAR ROS package
+# 🤖 Autonomous Following Bot
 
-ROS node and test application for RPLIDAR
+This repository contains the full-stack implementation of an **Autonomous Following Robot** that uses **Ultra-Wideband (UWB)** for target tracking, **LiDAR** for obstacle detection, and a hybrid **MPC + PCIP + L1 Adaptive Optimization** algorithm for motion planning and control. The robot operates on a **ROS** architecture and runs on a **Raspberry Pi-powered mobile platform**.
 
-Visit following Website for more details about RPLIDAR:
+> 🧠 Built for dynamic indoor environments with real-time responsiveness and robust performance.
 
-rplidar roswiki: <http://wiki.ros.org/rplidar>
+---
 
-rplidar HomePage: <http://www.slamtec.com/en/Lidar>
+## 🗺️ Features
 
-rplidar SDK: <https://github.com/Slamtec/rplidar_sdk>
+- 🚀 Real-time **target following** using UWB trilateration
+- 🌳 **LiDAR-based** obstacle detection and avoidance
+- 🔄 Robust trajectory tracking with:
+  - **Model Predictive Control (MPC)**
+  - **Prediction-Correction Interior-Point (PCIP)** solver
+  - **L1 Adaptive Optimization (L1AO)** for uncertainty compensation
+- 🚗 Modular software stack on **ROS**
+- 🌟 Designed for **Raspberry Pi + robot car** platforms
 
-rplidar Tutorial: <https://github.com/robopeak/rplidar_ros/wiki>
+---
 
-## How to build rplidar ros package
+## 🧠 Algorithm Stack
 
-   1) Clone this project to your catkin's workspace src folder
-   2) Running catkin_make to build rplidarNode and rplidarNodeClient
+### Model Predictive Control (MPC)
+Solves a finite-horizon optimal control problem in real-time, generating control inputs that guide the robot to follow the UWB target while respecting safety and actuator constraints.
 
-## How to run rplidar ros package
+### PCIP Solver
+A fast, time-varying optimization method that accelerates convergence by applying prediction and correction steps, making it ideal for dynamic environments with changing constraints and goals.
 
-There're two ways to run rplidar ros package
+### L1 Adaptive Optimization (L1AO)
+Introduces robustness against modeling errors, sensor noise, and external disturbances. L1AO adjusts the optimization solution in real time, ensuring stability and consistent tracking performance.
 
-### I. Run rplidar node and view in the rviz
+---
 
-The command for RPLIDAR A1 is :
+## 📚 System Overview
 
+### ROS (Robot Operating System)
+- Integration of all components (UWB, LiDAR, planning, control)
+- Real-time message passing and modularity
+- Visualization through `rviz` and debugging with `rqt`
+
+### UWB Target Localization
+- 1 Tag (on person or target)
+- 3 Anchors (fixed in environment)
+- Uses **DW3000** modules for accurate trilateration
+
+### LiDAR Perception
+- 2D scanning with **RPLiDAR A1/A2**
+- Builds occupancy grid
+- Detects dynamic and static obstacles for avoidance
+
+### Raspberry Pi + Robot Car
+- ROS nodes run on **Raspberry Pi 4/5**
+- Controls DC motors via PWM or motor drivers
+- Chassis can be differential drive or Ackermann steering
+
+
+---
+
+## 🚧 Installation
+
+### Requirements
+- ROS Noetic
+- Python 3.8+
+- LiDAR SDK (e.g., RPLiDAR SDK)
+- `numpy`, `scipy`, `matplotlib`, `pyserial`, `pylidar`
+- Custom solvers for PCIP and L1AO
+
+### Build & Run
 ```bash
-roslaunch rplidar_ros view_rplidar_a1.launch
+git clone https://github.com/yourusername/autonomous_following_bot.git
+cd autonomous_following_bot
+catkin_make   # or colcon build (ROS2)
+source devel/setup.bash
+roslaunch launch/following_bot.launch
 ```
 
-The command for RPLIDAR A2M7 is :
+---
 
-```bash
-roslaunch rplidar_ros view_rplidar_a2m7.launch
-```
+## 🎥 Demo
 
-The command for RPLIDAR A2M8 is :
+Comming Soon!
 
-```bash
-roslaunch rplidar_ros view_rplidar_a2m8.launch
-```
+---
 
-The command for RPLIDAR A2M12 is :
+## 📚 References
 
-```bash
-roslaunch rplidar_ros view_rplidar_a2m12.launch
-```
+- Hovakimyan et al., "L1 Adaptive Optimization for Autonomous Systems", *2023*
+- Kim et al., "Real-Time MPC for Mobile Robots with Dynamic Obstacles", *2024*
+- ROS, RPLiDAR SDK, Qorvo DW3000 UWB Modules
 
-The command for RPLIDAR A3 is :
+---
 
-```bash
-roslaunch rplidar_ros view_rplidar_a3.launch
-```
+## 🧑‍💻 Author
 
-The command for RPLIDAR S1 is :
-
-```bash
-roslaunch rplidar_ros view_rplidar_s1.launch
-```
-
-The command for RPLIDAR S2 is :
-
-```bash
-roslaunch rplidar_ros view_rplidar_s2.launch
-```
-
-The command for RPLIDAR S3 is :
-
-```bash
-roslaunch rplidar_ros view_rplidar_s3.launch
-```
-
-The command for RPLIDAR S2E is :
-
-```bash
-roslaunch rplidar_ros view_rplidar_s2e.launch
-```
-
-The command for RPLIDAR T1 is :
-
-```bash
-roslaunch rplidar_ros view_rplidar_t1.launch
-```
-
-The command for RPLIDAR C1 is :
-
-```bash
-roslaunch rplidar_ros view_rplidar_c1.launch
-```
-
-You should see rplidar's scan result in the rviz.
-
-### II. Run rplidar node and view using test application
-
-The command for RPLIDAR A1 is :
-
-```bash
-roslaunch rplidar_ros rplidar_a1.launch
-```
-
-The command for RPLIDAR A2M7 is :
-
-```bash
-roslaunch rplidar_ros rplidar_a2m7.launch
-```
-
-The command for RPLIDAR A2M8 is :
-
-```bash
-roslaunch rplidar_ros rplidar_a2m8.launch
-```
-
-The command for RPLIDAR A2M12 is :
-
-```bash
-roslaunch rplidar_ros rplidar_a2m12.launch
-```
-
-The command for RPLIDAR A3 is :
-
-```bash
-roslaunch rplidar_ros rplidar_a3.launch
-```
-
-The command for RPLIDAR S1 is :
-
-```bash
-roslaunch rplidar_ros rplidar_s1.launch
-```
-
-The command for RPLIDAR S2 is :
-
-```bash
-roslaunch rplidar_ros rplidar_s2.launch
-```
-
-The command for RPLIDAR S3 is :
-
-```bash
-roslaunch rplidar_ros rplidar_s3.launch
-```
-
-The command for RPLIDAR S2E is :
-
-```bash
-roslaunch rplidar_ros rplidar_s2e.launch
-```
-
-The command for RPLIDAR T1 is :
-
-```bash
-roslaunch rplidar_ros rplidar_t1.launch
-```
-
-The command for RPLIDAR C1 is :
-
-```bash
-roslaunch rplidar_ros rplidar_c1.launch
-```
-
-and in another terminal, run the following command
-
-```bash
-rosrun rplidar_ros rplidarNodeClient
-```
-
-You should see rplidar's scan result in the console.
-
-Notice: different lidar use different serial_baudrate.
-
-## RPLidar frame
-
-RPLidar frame must be broadcasted according to picture shown in rplidar-frame.png
+**Geonwoo Kim**  
+[GitHub](https://github.com/ggannuuu)
